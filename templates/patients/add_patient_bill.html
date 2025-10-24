@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form method="POST" action="{% url 'add_patient_bill' %}" class="space-y-8">
+    {% csrf_token %}
+
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">1. Patient Details</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700">Name (Required)</label>
+                <input type="text" name="name" id="name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="gender" class="block text-sm font-medium text-gray-700">Gender (Required)</label>
+                <select name="gender" id="gender" required class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <option value="M">Male</option>
+                    <option value="F">Female</option>
+                    <option value="O">Other</option>
+                </select>
+            </div>
+            <div>
+                <label for="phone" class="block text-sm font-medium text-gray-700">Phone (Optional)</label>
+                <input type="text" name="phone" id="phone" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="address" class="block text-sm font-medium text-gray-700">Address (Optional)</label>
+                <input type="text" name="address" id="address" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+            
+            <div class="md:col-span-2">
+                <label for="referred_by" class="block text-sm font-medium text-gray-700">Referred By (Optional)</label>
+                <select name="referred_by" id="referred_by" class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <option value="">--- None ---</option>
+                    {% for doctor in all_doctors %}
+                    <option value="{{ doctor.id }}">{{ doctor.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">2. Select Tests</h2>
+        <div id="test-container" class="space-y-4">
+            </div>
+        <button type="button" id="add-test-btn" class="mt-4 px-4 py-2 border border-dashed border-gray-400 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition duration-300">
+            + Add Another Test
+        </button>
+        <div class="mt-4 pt-4 border-t border-gray-200">
+            <span class="text-lg font-semibold text-gray-800">Total Test Amount: Rs. <span id="total-amount">0.00</span></span>
+        </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">3. Billing</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="discount" class="block text-sm font-medium text-gray-700">Discount (in Rupees)</label>
+                <input type="number" name="discount" id="discount" value="0" step="0.01" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="payment_status" class="block text-sm font-medium text-gray-700">Payment Status</label>
+                <select name="payment_status" id="payment_status" class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <option value="Pending">Pending</option>
+                    <option value="Paid">Paid</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-end">
+        <button type="submit" class="px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 ease-in-out transform hover:scale-105">
+            Save Patient & Create Bill
+        </button>
+    </div>
+</form>
+
+<script>
+    const allTests = JSON.parse('{{ all_tests_json|safe }}');
+    const testContainer = document.getElementById('test-container');
+    const addTestBtn = document.getElementById('add-test-btn');
+    const totalAmountSpan = document.getElementById('total-amount');
+
+    function createTestRow(selectedTestId = null) {
+        const row = document.createElement('div');
+        row.className = 'flex items-center space-x-2';
+        
+        const select = document.createElement('select');
+        select.name = 'tests';
+        select.className = 'block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm';
+
+        const placeholder = document.createElement('option');
+        placeholder.value = '';
+        placeholder.textContent = '--- Select a test ---';
+        placeholder.setAttribute('data-price', '0');
+        select.appendChild(placeholder);
+        
+        allTests.forEach(test => {
+            const option = document.createElement('option');
+            option.value = test.id;
+            option.textContent = `${test.name} (Rs. ${test.price})`;
+            option.setAttribute('data-price', test.price);
+            
+            // If this function was called with a test ID, select it
+            if (selectedTestId && test.id == selectedTestId) {
+                option.selected = true;
+            }
+            select.appendChild(option);
+        });
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.textContent = 'Remove';
+        removeBtn.className = 'px-3 py-2 text-sm font-medium text-red-600 bg-red-100 rounded-md hover:bg-red-200 transition duration-300';
+        
+        select.addEventListener('change', calculateTotal);
+        removeBtn.addEventListener('click', () => {
+            row.remove();
+            calculateTotal();
+        });
+
+        row.appendChild(select);
+        row.appendChild(removeBtn);
+        testContainer.appendChild(row);
+    }
+
+    function calculateTotal() {
+        let total = 0;
+        const selectedTests = testContainer.querySelectorAll('select[name="tests"]');
+        
+        selectedTests.forEach(select => {
+            const selectedOption = select.options[select.selectedIndex];
+            const price = parseFloat(selectedOption.getAttribute('data-price') || 0);
+            total += price;
+        });
+        
+        totalAmountSpan.textContent = total.toFixed(2);
+    }
+
+    addTestBtn.addEventListener('click', () => createTestRow());
+    createTestRow(); // Add one empty row to start with
+    calculateTotal();
+</script>
+{% endblock %}

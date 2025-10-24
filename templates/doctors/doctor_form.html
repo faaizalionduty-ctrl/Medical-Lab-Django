@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold text-gray-900 mb-6">
+        {% if object %}
+            Edit Doctor: {{ object.name }}
+        {% else %}
+            Create a New Doctor
+        {% endif %}
+    </h1>
+
+    <form method="POST" class="space-y-6">
+        {% csrf_token %}
+        
+        <div>
+            <label for="id_name" class="block text-sm font-medium text-gray-700">Doctor Name</label>
+            <input type="text" name="name" id="id_name" value="{{ form.name.value|default:'' }}" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            {% if form.name.errors %}
+                <p class="mt-1 text-sm text-red-600">{{ form.name.errors|first }}</p>
+            {% endif %}
+        </div>
+        
+        <div class="flex justify-end space-x-3">
+            <a href="{% url 'doctor_list' %}" class="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 transition duration-300">
+                Cancel
+            </a>
+            <button type="submit" class="px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300">
+                Save Doctor
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

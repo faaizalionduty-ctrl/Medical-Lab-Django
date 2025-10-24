@@ -1,0 +1,99 @@
+# ========================================
+# Python / Django .gitignore
+# ========================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environment
+venv/
+env/
+.venv/
+.env/
+ENV/
+env.bak/
+venv.bak/
+
+# Django stuff
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+static_root/
+tmp/
+celerybeat-schedule
+*.pot
+
+# If you're collecting static files to STATIC_ROOT
+/static/
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# macOS / Linux / Windows files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment variables and secrets
+.env.local
+.env.production
+.env.staging
+*.env
+
+# Backup and temporary files
+*.bak
+*.swp
+*.swo
+*.tmp
+*~
+
+# Migrations (optional — comment out if you want to track migrations)
+# **/migrations/
+# !**/migrations/__init__.py
