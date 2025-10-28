@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold tracking-tight text-gray-900">Financial Reports</h1>
+</div>
+
+<!-- Filter Form -->
+<div class="bg-white p-6 rounded-lg shadow-md mb-8">
+    <form method="GET" action="{% url 'reports' %}" class="space-y-4 md:space-y-0 md:flex md:items-end md:space-x-4">
+        
+        <!-- Filter Type Dropdown -->
+        <div>
+            <label for="filter_type" class="block text-sm font-medium text-gray-700">Select Period</label>
+            <select name="filter_type" id="filter_type" class="mt-1 block w-full md:w-48 px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <option value="today" {% if current_filter == 'today' %}selected{% endif %}>Today</option>
+                <option value="this_week" {% if current_filter == 'this_week' %}selected{% endif %}>This Week</option>
+                <option value="this_month" {% if current_filter == 'this_month' %}selected{% endif %}>This Month</option>
+                <option value="custom" {% if current_filter == 'custom' %}selected{% endif %}>Custom Range</option>
+            </select>
+        </div>
+        
+        <!-- Custom Date Range Fields (hidden by default) -->
+        <div id="custom-dates" class="flex items-end space-x-4 {% if current_filter != 'custom' %}hidden{% endif %}">
+            <div>
+                <label for="start_date" class="block text-sm font-medium text-gray-700">Start Date</label>
+                <input type="date" name="start_date" id="start_date" value="{{ start_date_val }}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="end_date" class="block text-sm font-medium text-gray-700">End Date</label>
+                <input type="date" name="end_date" id="end_date" value="{{ end_date_val }}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+        </div>
+        
+        <!-- Submit Button -->
+        <div>
+            <button type="submit" class="w-full md:w-auto px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300">
+                Generate Report
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Stats Cards -->
+<div>
+    <h2 class="text-2xl font-semibold text-gray-900 mb-4">{{ period_description }}</h2>
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <!-- Total Income -->
+        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+            <h3 class="text-sm font-medium text-gray-500">Total Income (Paid)</h3>
+            <p class="mt-2 text-4xl font-bold text-green-600">Rs. {{ total_income|floatformat:2 }}</p>
+        </div>
+        <!-- Total Patients -->
+        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+            <h3 class="text-sm font-medium text-gray-500">Total Patients Served</h3>
+            <p class="mt-2 text-4xl font-bold text-indigo-600">{{ total_patients_served }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript to show/hide custom date fields -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterType = document.getElementById('filter_type');
+        const customDates = document.getElementById('custom-dates');
+
+        function toggleCustomDates() {
+            if (filterType.value === 'custom') {
+                customDates.classList.remove('hidden');
+            } else {
+                customDates.classList.add('hidden');
+            }
+        }
+
+        // Run on page load in case 'custom' is already selected
+        toggleCustomDates();
+
+        // Run when the dropdown changes
+        filterType.addEventListener('change', toggleCustomDates);
+    });
+</script>
+ 
+<!-- Detailed Bills Table -->
+<div class="mt-8">
+    <h3 class="text-xl font-semibold text-gray-900 mb-4">Patient Visits (details)</h3>
+
+    {% comment %} Make the table scrollable when there are many records {% endcomment %}
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="p-4">
+            <div class="w-full {% if bills_list|length > 10 %}max-h-96 overflow-y-auto{% endif %}">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50 sticky top-0">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Referred By</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Visit Time</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Bill (Rs.)</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Paid (Rs.)</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Due (Rs.)</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for bill in bills_list %}
+                        <tr class="hover:bg-gray-50 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ bill.patient.name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ bill.referred_by|default:'Walk-in' }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ bill.visit_time|date:"d/m/Y: h:i A" }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-right text-gray-900">Rs. {{ bill.net_amount|floatformat:2 }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-green-600">Rs. {{ bill.amount_paid|floatformat:2 }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-red-600">Rs. {{ bill.amount_due|floatformat:2 }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                {% if bill.payment_status == 'Paid' %}
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Paid</span>
+                                {% elif bill.payment_status == 'Partially Paid' %}
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">Partially Paid</span>
+                                {% else %}
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="px-6 py-4 text-center text-gray-500">No records for the selected period.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Net totals summary -->
+            <div class="mt-4 flex justify-end items-center space-x-6">
+                <div class="text-sm text-gray-600">Total Patients: <span class="font-semibold text-gray-900">{{ total_patients_served }}</span></div>
+                <div class="text-sm text-gray-600">Total Amount Received: <span class="font-semibold text-green-700">Rs. {{ total_income|floatformat:2 }}</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

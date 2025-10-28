@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dad's Medical Lab</title>
+    <title>Fatima Lab</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -42,16 +42,22 @@
     <!-- Navbar -->
     <nav class="bg-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex">
-                    <a href="{% url 'dashboard' %}" class="flex-shrink-0 flex items-center text-2xl font-bold text-indigo-600">
+            <!-- Updated layout for better spacing -->
+            <div class="flex justify-between items-center h-16">
+                
+                <!-- Left: Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <a href="{% url 'dashboard' %}" class="text-2xl font-bold text-indigo-600">
                          Fatima Lab Machiwal 🔬
                     </a>
                 </div>
                 
-                <!-- Search Bar -->
-                <div class="flex-1 flex items-center justify-center px-2 lg:ml-6 lg:justify-end">
-                    <div class="max-w-lg w-full lg:max-w-xs">
+                <!-- Right: Search + Nav Links -->
+                <div class="flex items-center space-x-4">
+
+                    <!-- Search Bar -->
+                    <div class="flex-shrink-0">
+                        <!-- Updated form action to use the root URL -->
                         <form method="GET" action="{% url 'patient_search' %}" class="relative">
                             <label for="search" class="sr-only">Search</label>
                             <input id="search" name="q" class="block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Search patients..." type="search" value="{{ request.GET.q|default:'' }}">
@@ -63,18 +69,22 @@
                             </button>
                         </form>
                     </div>
+
+                    <!-- Nav Links -->
+                    <div class="flex items-center space-x-1">
+                        <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-indigo-600 px-2 py-2 rounded-md text-sm font-medium transition duration-300">Dashboard</a>
+                        <a href="{% url 'reports' %}" class="text-gray-700 hover:text-indigo-600 px-2 py-2 rounded-md text-sm font-medium transition duration-300">All Reports</a>
+                        <a href="{% url 'doctor_reports' %}" class="text-gray-700 hover:text-indigo-600 px-2 py-2 rounded-md text-sm font-medium transition duration-300">Doctor Reports</a>
+                        <!-- Updated link to use root URL -->
+                        <a href="{% url 'payment_management' %}" class="text-gray-700 hover:text-indigo-600 px-2 py-2 rounded-md text-sm font-medium transition duration-300">Payments</a>
+                        <a href="{% url 'test_list' %}" class="text-gray-700 hover:text-indigo-600 px-2 py-2 rounded-md text-sm font-medium transition duration-300">Tests</a>
+                        <a href="{% url 'doctor_list' %}" class="text-gray-700 hover:text-indigo-600 px-2 py-2 rounded-md text-sm font-medium transition duration-300">Doctors</a>
+                        <a href="{% url 'add_patient_bill' %}" class="ml-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300">
+                            + Add Patient
+                        </a>
+                    </div>
                 </div>
 
-                <div class="flex items-center space-x-3">
-                    <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Dashboard</a>
-                    <a href="{% url 'payment_management' 1 %}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Manage Payments</a>
-
-                    <a href="{% url 'test_list' %}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Manage Tests</a>
-                    <a href="{% url 'doctor_list' %}" class="text-gray-700 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium transition duration-300">Manage Doctors</a>
-                    <a href="{% url 'add_patient_bill' %}" class="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300 ease-in-out transform hover:-translate-y-0.5">
-                        + Add New Patient
-                    </a>
-                </div>
             </div>
         </div>
     </nav>
@@ -86,7 +96,7 @@
         {% endblock %}
     </main>
 
-    <!-- Footer -->
+    <!-- Footer (Preserving your edits) -->
     <footer class="bg-gray-800 text-gray-400 mt-12 shadow-inner w-full">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
@@ -103,6 +113,21 @@
             </div>
         </div>
     </footer>
+    
+    <!-- Global JS for searchable dropdowns (from your template) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Find all select elements with the class 'searchable'
+            const elements = document.querySelectorAll('select.searchable');
+            elements.forEach(el => {
+                new Choices(el, {
+                    searchEnabled: true,
+                    removeItemButton: true,
+                });
+            });
+        });
+    </script>
 
 </body>
 </html>
+

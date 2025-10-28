@@ -25,9 +25,9 @@ SECRET_KEY = 'django-insecure-=z^xg#0!)ubv1#u(+u0mpc+1^k=l1mu370+5(t$buuaev5d@&_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
-
+ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = ['https://bettina-disharmonious-ejectively.ngrok-free.dev']
+# ALLOWED_HOSTS = ['fatima-lab.onrender.com]
 # Application definition
 
 INSTALLED_APPS = [

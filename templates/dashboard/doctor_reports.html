@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold tracking-tight text-gray-900">Doctor Referral Reports</h1>
+</div>
+
+<!-- Filter Form -->
+<div class="bg-white p-6 rounded-lg shadow-md mb-8">
+    <form method="GET" action="{% url 'doctor_reports' %}" class="space-y-4 md:space-y-0 md:flex md:items-end md:space-x-4">
+        
+        <!-- Select Doctor Dropdown -->
+        <div>
+            <label for="doctor_id" class="block text-sm font-medium text-gray-700">Select Doctor</label>
+            <!-- Updated dropdown styling for better width & readability -->
+            <select name="doctor_id" id="doctor_id" class="searchable mt-1 block w-full md:min-w-[16rem] lg:min-w-[20rem] px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm whitespace-nowrap" required>
+                <option value="">--- Select a Doctor ---</option>
+                {% for doctor in all_doctors %}
+                {% if doctor.name != "Self" %}
+                    <option value="{{ doctor.id }}" {% if doctor.id == current_doctor_id %}selected{% endif %}>
+                        {{ doctor.name }}
+                    </option>
+                {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Filter Type Dropdown -->
+        <div>
+            <label for="filter_type" class="block text-sm font-medium text-gray-700">Select Period</label>
+            <select name="filter_type" id="filter_type" class="mt-1 block w-full md:w-48 px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <option value="today" {% if current_filter == 'today' %}selected{% endif %}>Today</option>
+                <option value="this_week" {% if current_filter == 'this_week' %}selected{% endif %}>This Week</option>
+                <option value="this_month" {% if current_filter == 'this_month' %}selected{% endif %}>This Month</option>
+                <option value="custom" {% if current_filter == 'custom' %}selected{% endif %}>Custom Range</option>
+            </select>
+        </div>
+        
+        <!-- Custom Date Range Fields (hidden by default) -->
+        <div id="custom-dates" class="flex items-end space-x-4 {% if current_filter != 'custom' %}hidden{% endif %}">
+            <div>
+                <label for="start_date" class="block text-sm font-medium text-gray-700">Start Date</label>
+                <input type="date" name="start_date" id="start_date" value="{{ start_date_val }}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+            <div>
+                <label for="end_date" class="block text-sm font-medium text-gray-700">End Date</label>
+                <input type="date" name="end_date" id="end_date" value="{{ end_date_val }}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+            </div>
+        </div>
+        
+        <!-- Submit Button -->
+        <div>
+            <button type="submit" class="w-full md:w-auto px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300">
+                Generate Report
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Stats Cards -->
+<div>
+    <h2 class="text-2xl font-semibold text-gray-900 mb-4">{{ period_description }}</h2>
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+        <!-- Total Patients -->
+        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+            <h3 class="text-sm font-medium text-gray-500">Total Patients Referred</h3>
+            <p class="mt-2 text-4xl font-bold text-indigo-600">{{ total_patients_referred }}</p>
+        </div>
+        <!-- Total Bill Amount -->
+        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+            <h3 class="text-sm font-medium text-gray-500">Total Bill Amount (from Referrals)</h3>
+            <p class="mt-2 text-4xl font-bold text-blue-600">Rs. {{ total_bill_amount|floatformat:2 }}</p>
+        </div>
+        <!-- Doctor's Share -->
+        <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
+            <h3 class="text-sm font-medium text-gray-500">Doctor's Share (20%)</h3>
+            <p class="mt-2 text-4xl font-bold text-green-600">Rs. {{ doctor_share_amount|floatformat:2 }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Style Fixes for Dropdown -->
+<style>
+/* Fix Choices.js dropdown width and prevent text wrapping */
+.choices {
+  width: 100% !important;
+  min-width: 16rem !important;
+  max-width: 100% !important;
+}
+
+.choices__inner {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Ensure dropdown list matches input width */
+.choices__list--dropdown {
+  width: 100% !important;
+  min-width: 16rem !important;
+}
+</style>
+
+<!-- JavaScript to show/hide custom date fields -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Show/hide custom date range fields
+        const filterType = document.getElementById('filter_type');
+        const customDates = document.getElementById('custom-dates');
+
+        function toggleCustomDates() {
+            if (filterType.value === 'custom') {
+                customDates.classList.remove('hidden');
+            } else {
+                customDates.classList.add('hidden');
+            }
+        }
+
+        toggleCustomDates();
+        filterType.addEventListener('change', toggleCustomDates);
+
+        // Initialize searchable doctor dropdown (Choices.js)
+        const doctorSelect = document.getElementById('doctor_id');
+        if (doctorSelect && typeof Choices !== 'undefined') {
+            new Choices(doctorSelect, {
+                searchEnabled: true,
+                removeItemButton: true,
+                shouldSort: false,
+            });
+        }
+    });
+</script>
+
+{% endblock %}
