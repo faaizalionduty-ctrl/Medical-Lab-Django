@@ -1,3 +1,5 @@
+LOGIN_URL = '/auth/login/'
+LOGIN_REDIRECT_URL = '/'
 """
 Django settings for medical_lab project.
 
@@ -10,7 +12,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,14 +27,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-=z^xg#0!)ubv1#u(+u0mpc+1^k=l1mu370+5(t$buuaev5d@&_'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key-change-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['https://bettina-disharmonious-ejectively.ngrok-free.dev']
-# ALLOWED_HOSTS = ['fatima-lab.onrender.com]
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://bettina-disharmonious-ejectively.ngrok-free.dev').split(',')
 # Application definition
 
 INSTALLED_APPS = [
@@ -42,6 +48,7 @@ INSTALLED_APPS = [
     'labtests',
     'patients',
     'doctors',
+    'userauth',
 ]
 
 MIDDLEWARE = [
@@ -55,8 +62,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'medical_lab.urls'
-
-import os
 
 TEMPLATES = [
     {
@@ -81,8 +86,12 @@ WSGI_APPLICATION = 'medical_lab.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': os.getenv('DB_NAME', 'medical_lab'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', ''),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 

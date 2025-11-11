@@ -1,12 +1,14 @@
 from django.shortcuts import render
 from django.utils import timezone
 from django.db.models import Sum, Count
+from django.contrib.auth.decorators import login_required
 from patients.models import Bill, PaymentTransaction # Import PaymentTransaction
 from doctors.models import Doctor
 from decimal import Decimal
 import datetime
 import calendar
 
+@login_required
 def dashboard_view(request):
     today = timezone.now().date()
     
@@ -33,7 +35,7 @@ def dashboard_view(request):
     }
     return render(request, 'dashboard/dashboard.html', context)
 
-
+@login_required
 def reports_view(request):
     today = timezone.now().date()
     

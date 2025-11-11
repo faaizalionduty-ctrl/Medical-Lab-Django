@@ -41,7 +41,7 @@
 
     <!-- Navbar -->
     <nav class="bg-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="w-full mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Updated layout for better spacing -->
             <div class="flex justify-between items-center h-16">
                 
@@ -75,13 +75,20 @@
                         <a href="{% url 'dashboard' %}" class="text-gray-700 hover:text-indigo-600 px-2 py-2 rounded-md text-sm font-medium transition duration-300">Dashboard</a>
                         <a href="{% url 'reports' %}" class="text-gray-700 hover:text-indigo-600 px-2 py-2 rounded-md text-sm font-medium transition duration-300">All Reports</a>
                         <a href="{% url 'doctor_reports' %}" class="text-gray-700 hover:text-indigo-600 px-2 py-2 rounded-md text-sm font-medium transition duration-300">Doctor Reports</a>
-                        <!-- Updated link to use root URL -->
                         <a href="{% url 'payment_management' %}" class="text-gray-700 hover:text-indigo-600 px-2 py-2 rounded-md text-sm font-medium transition duration-300">Payments</a>
                         <a href="{% url 'test_list' %}" class="text-gray-700 hover:text-indigo-600 px-2 py-2 rounded-md text-sm font-medium transition duration-300">Tests</a>
                         <a href="{% url 'doctor_list' %}" class="text-gray-700 hover:text-indigo-600 px-2 py-2 rounded-md text-sm font-medium transition duration-300">Doctors</a>
-                        <a href="{% url 'add_patient_bill' %}" class="ml-2 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300">
-                            + Add Patient
-                        </a>
+                        <div class="flex items-center space-x-2">
+                            <a href="{% url 'add_patient_bill' %}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300">
+                                + Add Patient
+                            </a>
+                            {% if request.user.is_authenticated %}
+                            <form method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-300">Logout</button>
+                            </form>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
 
@@ -90,7 +97,7 @@
     </nav>
 
     <!-- Page Content -->
-    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8 w-full">
+    <main class="w-full mx-auto py-6 sm:px-6 lg:px-8">
         {% block content %}
         <!-- Content from other templates will go here -->
         {% endblock %}

@@ -6,8 +6,10 @@ from doctors.models import Doctor
 from decimal import Decimal
 import json
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
 
 
+@login_required
 def add_patient_bill_view(request):
     if request.method == 'POST':
         # ... (Get Patient data is unchanged) ...
@@ -70,6 +72,7 @@ def add_patient_bill_view(request):
     return render(request, 'patients/add_patient_bill.html', context)
 
 # ... (edit_patient_bill_view is unchanged) ...
+@login_required
 def edit_patient_bill_view(request, bill_id):
     bill = get_object_or_404(Bill, id=bill_id)
     patient = bill.patient
@@ -114,6 +117,7 @@ def edit_patient_bill_view(request, bill_id):
 
 
 # ... (payment_management_view is unchanged) ...
+@login_required
 def payment_management_view(request, page=1):
     all_bills_list = Bill.objects.order_by('-created_at').select_related('patient')
     paginator = Paginator(all_bills_list, 20)
@@ -124,6 +128,7 @@ def payment_management_view(request, page=1):
 # --- 'add_payment_view' is REMOVED ---
 
 # --- NEW VIEW ---
+@login_required
 def manage_bill_payments_view(request, bill_id):
     bill = get_object_or_404(Bill, id=bill_id)
     
@@ -154,6 +159,7 @@ def manage_bill_payments_view(request, bill_id):
     return render(request, 'patients/manage_bill_payments.html', context)
 
 # --- NEW VIEW ---
+@login_required
 def delete_payment_view(request, pk):
     # 'pk' is the ID of the PaymentTransaction
     transaction = get_object_or_404(PaymentTransaction, pk=pk)
@@ -166,6 +172,7 @@ def delete_payment_view(request, pk):
     return redirect('manage_bill_payments', bill_id=bill_id)
 
 # ... (update_discount_view is unchanged) ...
+@login_required
 def update_discount_view(request, bill_id):
     if request.method == 'POST':
         new_discount = Decimal(request.POST.get('discount') or 0.0)
@@ -177,6 +184,7 @@ def update_discount_view(request, bill_id):
 
 # ... (search_patients_view is unchanged) ...
 # --- NEW DELETE VIEW ---
+@login_required
 def delete_patient_view(request, bill_id):
     bill = get_object_or_404(Bill, id=bill_id)
     patient = bill.patient
@@ -192,6 +200,7 @@ def delete_patient_view(request, bill_id):
     }
     return render(request, 'patients/patient_confirm_delete.html', context)
 
+@login_required
 def search_patients_view(request, page=1):
     query = request.GET.get('q', '')
     bill_list = []
@@ -211,4 +220,3 @@ def search_patients_view(request, page=1):
         'query': query,
     }
     return render(request, 'patients/patient_search.html', context)
-
